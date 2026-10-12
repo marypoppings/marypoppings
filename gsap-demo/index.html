@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GSAP Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#120e0a; --ink:#f2e9dc; --muted:#a89d8d; --gold:#e6c9a0; --line:rgba(230,201,160,.25); }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); color:var(--ink); font-family:'Jost',sans-serif; font-weight:300; line-height:1.7; }
+  section { min-height:100vh; padding:20vh 24px; max-width:900px; margin:0 auto; }
+  h1,h2 { font-family:'Cormorant Garamond',serif; font-weight:300; line-height:1.05; }
+  h1 { font-size:clamp(3rem,12vw,7rem); }
+  h2 { font-size:clamp(2.2rem,8vw,4.5rem); margin-bottom:2rem; }
+  em { color:var(--gold); }
+  .eyebrow { letter-spacing:.3em; text-transform:uppercase; font-size:.75rem; color:var(--muted); margin-bottom:1.5rem; }
+  .line { display:block; overflow:hidden; }
+  .line > span { display:block; }
+  p.lead { color:var(--muted); max-width:34rem; margin-top:2rem; }
+
+  /* floating pill nav */
+  .pill { position:fixed; top:16px; left:50%; transform:translateX(-50%); display:flex; gap:10px; align-items:center;
+    padding:10px; border:1px solid var(--line); border-radius:999px; background:rgba(18,14,10,.75); backdrop-filter:blur(10px); z-index:10; }
+  .pill a, .pill button { font:inherit; font-size:.75rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink);
+    text-decoration:none; padding:10px 18px; border:1px solid var(--line); border-radius:999px; background:none; cursor:pointer; }
+  .pill .cta { background:var(--gold); color:#1a130c; border-color:var(--gold); }
+
+  /* accordion */
+  .item { border-top:1px solid var(--line); }
+  .item button { width:100%; display:flex; justify-content:space-between; align-items:center; gap:16px; padding:28px 0;
+    background:none; border:0; color:var(--ink); font:inherit; font-size:1.25rem; text-align:left; cursor:pointer; }
+  .item .icon { flex:none; width:36px; height:36px; border:1px solid var(--line); border-radius:50%; display:grid; place-items:center; color:var(--gold); }
+  .panel { height:0; overflow:hidden; color:var(--muted); }
+  .panel p { padding-bottom:28px; }
+
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior:auto; } }
+</style>
+</head>
+<body>
+
+<nav class="pill">
+  <a href="#top" aria-label="Back to top">&uarr;</a>
+  <a href="#faq">Menu</a>
+  <a href="#faq" class="cta">Enrol</a>
+</nav>
+
+<section id="top">
+  <p class="eyebrow hero-fade">01 — Demo</p>
+  <h1>
+    <span class="line"><span>Quiet motion,</span></span>
+    <span class="line"><span><em>on purpose.</em></span></span>
+  </h1>
+  <p class="lead hero-fade">Scroll down. Everything that moves here is a few lines of GSAP.</p>
+</section>
+
+<section>
+  <p class="eyebrow reveal">02 — Scroll reveal</p>
+  <h2 class="reveal">Words that arrive <em>when you do.</em></h2>
+  <p class="lead reveal">Each block fades and rises once as it enters the screen, then stays still. Knowing when to stop moving is the design part.</p>
+</section>
+
+<section id="faq">
+  <p class="eyebrow reveal">03 — Accordion</p>
+  <h2 class="reveal">Questions you <em>may wonder.</em></h2>
+  <div class="item">
+    <button aria-expanded="false"><span>Do I need to know how to code?</span><span class="icon">+</span></button>
+    <div class="panel"><p>No. Describe what you want and direct the result.</p></div>
+  </div>
+  <div class="item">
+    <button aria-expanded="false"><span>What is GSAP?</span><span class="icon">+</span></button>
+    <div class="panel"><p>A free JavaScript animation library. It moves page elements; it is not a video service.</p></div>
+  </div>
+  <div class="item">
+    <button aria-expanded="false"><span>How long does it take?</span><span class="icon">+</span></button>
+    <div class="panel"><p>A simple page like this can be built in an afternoon.</p></div>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!calm) {
+    // Hero: lines slide up from behind a mask
+    gsap.from('.line > span', { yPercent:110, duration:1.2, ease:'power4.out', stagger:.15 });
+    gsap.from('.hero-fade', { opacity:0, y:20, duration:1, delay:.6, stagger:.15, ease:'power2.out' });
+
+    // Scroll reveals: play once on entry
+    gsap.utils.toArray('.reveal').forEach(el => {
+      gsap.from(el, { opacity:0, y:40, duration:1, ease:'power3.out',
+        scrollTrigger:{ trigger:el, start:'top 85%', once:true } });
+    });
+
+    // Pill nav hides on scroll down, returns on scroll up
+    const pill = gsap.to('.pill', { yPercent:-150, duration:.4, paused:true, ease:'power2.inOut' });
+    ScrollTrigger.create({ start:100, onUpdate: s => s.direction === 1 ? pill.play() : pill.reverse() });
+  }
+
+  // Accordion: one open at a time
+  const items = document.querySelectorAll('.item');
+  items.forEach(item => {
+    const btn = item.querySelector('button'), panel = item.querySelector('.panel'), icon = item.querySelector('.icon');
+    btn.addEventListener('click', () => {
+      const open = btn.getAttribute('aria-expanded') === 'true';
+      items.forEach(o => {
+        const b = o.querySelector('button');
+        if (b !== btn && b.getAttribute('aria-expanded') === 'true') {
+          b.setAttribute('aria-expanded','false');
+          gsap.to(o.querySelector('.panel'), { height:0, duration:.5, ease:'power3.inOut' });
+          o.querySelector('.icon').textContent = '+';
+        }
+      });
+      btn.setAttribute('aria-expanded', String(!open));
+      icon.textContent = open ? '+' : '−';
+      gsap.to(panel, { height: open ? 0 : 'auto', duration: calm ? 0 : .5, ease:'power3.inOut' });
+    });
+  });
+</script>
+</body>
+</html>
