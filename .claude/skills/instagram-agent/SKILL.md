@@ -22,6 +22,7 @@ Without `accounts.json` and tokens, do not pretend to act: draft content and pla
 ig.py accounts                                   # list configured accounts
 ig.py media    -a NAME [--limit 10]              # recent posts with likes/comments
 ig.py insights -a NAME [--days 28]               # reach, views, interactions, follower change
+ig.py hashtag  -a NAME --tag TAG [--limit 15]    # top posts for a hashtag (read-only; 30 new tags/7 days)
 ig.py comments -a NAME --media-id ID             # comments on a post
 ig.py reply    -a NAME --comment-id ID --text T [--yes]
 ig.py hide     -a NAME --comment-id ID [--yes]
@@ -48,3 +49,14 @@ All write commands (`reply`, `hide`, `publish`) are **dry-run unless `--yes` is 
 **Publish** — draft → user approves → `publish --yes` → confirm the returned permalink back to the user.
 
 **Report** — per-account table: reach, views, interactions, follower change, best post, and one recommended action.
+
+## Engagement queue (liking/commenting on other people's posts)
+
+The Graph API **cannot** like or comment on other people's posts, and automating it by any other means (passwords, private APIs, bots) is forbidden here. Instead, prepare a queue the **user acts on manually** in the app.
+
+1. **Targets.** Per account, maintain a target list (creators, brands, hashtags) in `engagement/NAME.md` in the repo, matched to the account's niche. Find candidates with `ig.py hashtag`, the user's mentions, and any post links/captions the user pastes. Instagram pages can't be fetched; ask the user to paste caption text.
+2. **Daily queue.** For each account, produce 10–15 items: post link, one-line "why this one", and a drafted comment in that account's `voice`. Prioritize recent posts (<24h) from accounts of similar or larger size, and replies in active threads.
+3. **Write comments with the `humanizer` skill.** Comments must reference something specific in the post, be 1–2 sentences, vary in length and form, and never be generic ("Love this! 🔥"), promotional, or contain links or asks to follow.
+4. **Hand-off.** Present the queue as a checklist. The user opens each link, edits the comment if they like, posts and likes it themselves. Mark done items; skip anything the user rejects and note why.
+5. **Follow up.** Next run, check the user's own posts and comments for replies (`media`, `comments`) and draft responses.
+6. **Pace and safety.** Cap the queue at 15 items per account per day; spread across the day; no copy-pasted comments across accounts; skip sensitive posts (grief, politics, health, controversy) unless the user explicitly asks.

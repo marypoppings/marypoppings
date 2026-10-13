@@ -79,6 +79,19 @@ def cmd_insights(cfg, args):
             print(f"{m['name']:<22} {m.get('total_value', {}).get('value')}")
 
 
+def cmd_hashtag(cfg, args):
+    """Read-only: top posts for a hashtag, to find engagement targets (limit: 30 unique hashtags / 7 days)."""
+    a = pick(cfg, args.account)[0]
+    hid = call(cfg, a, "GET", "ig_hashtag_search",
+               {"user_id": a["ig_user_id"], "q": args.tag.lstrip("#")})["data"][0]["id"]
+    r = call(cfg, a, "GET", f"{hid}/top_media", {
+        "user_id": a["ig_user_id"], "limit": args.limit,
+        "fields": "id,caption,media_type,permalink,like_count,comments_count,timestamp"})
+    for m in r.get("data", []):
+        cap = (m.get("caption") or "").replace("\n", " ")[:90]
+        print(f"{m['timestamp'][:10]} ♥{m.get('like_count', 0)} 💬{m.get('comments_count', 0)} {m['permalink']}\n  {cap}")
+
+
 def cmd_comments(cfg, args):
     a = pick(cfg, args.account)[0]
     r = call(cfg, a, "GET", f"{args.media_id}/comments",
@@ -140,6 +153,8 @@ def main():
     add("accounts", cmd_accounts, acct=False)
     add("media", cmd_media).add_argument("--limit", type=int, default=10)
     add("insights", cmd_insights).add_argument("--days", type=int, default=28)
+    s = add("hashtag", cmd_hashtag)
+    s.add_argument("--tag", required=True); s.add_argument("--limit", type=int, default=15)
     add("comments", cmd_comments).add_argument("--media-id", required=True)
     s = add("reply", cmd_reply)
     s.add_argument("--comment-id", required=True); s.add_argument("--text", required=True)
