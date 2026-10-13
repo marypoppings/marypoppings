@@ -1,0 +1,21 @@
+{
+  "api_version": "v23.0",
+  "accounts": [
+    {
+      "name": "brand-one",
+      "ig_user_id": "17841400000000000",
+      "token_env": "IG_TOKEN_BRAND_ONE",
+      "voice": "Warm, playful, concise. Light emoji use.",
+      "pillars": ["behind the scenes", "tips", "community features"],
+      "rules": ["Never discuss pricing in comments", "Always reply within 24h"]
+    },
+    {
+      "name": "brand-two",
+      "ig_user_id": "17841400000000001",
+      "token_env": "IG_TOKEN_BRAND_TWO",
+      "voice": "Professional and direct.",
+      "pillars": ["product updates", "case studies"],
+      "rules": []
+    }
+  ]
+}
